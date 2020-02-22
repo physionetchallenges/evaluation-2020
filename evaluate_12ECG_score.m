@@ -14,8 +14,7 @@
 % correct diagnoses and false alarms
 %
 % Inputs:
-%   'label_directory' is a directory of comma-delimited text files containing
-%   vector of the true labels
+%   'label_directory' is the input directory with the headers and #dx with the true labels
 %
 %   'output_directory' is a directory of comma-delimited text files, where
 %   the first row of the file is the predictive labels for each class and
@@ -80,7 +79,7 @@ function evaluate_12ECG_score(label_directory, output_directory, output_file)
 
 	[recording_label,classes_label,single_recording_labels]=get_true_labels([label_directory filesep label_files{k}],classes);
 
-        fid2=fopen([output_directory filesep output_files{k}]);
+        fid2=fopen(fullfile(output_directory,output_files{k}));
         recording_output = fgetl(fid2);
         classes_output = strsplit(fgetl(fid2),',');
         single_recording_output = cellfun(@str2double,strsplit(fgetl(fid2),','));
