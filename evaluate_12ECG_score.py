@@ -16,8 +16,7 @@
 # correct diagnoses and false alarms
 #
 # Inputs:
-#   'label_directory' is a directory of comma-delimited text files containing
-#   vector of the true labels
+#   'label_directory' is a input directory with the header files and #Dx true labels
 #
 #   'output_directory' is a directory of comma-delimited text files, where
 #   the first row of the file is the output label for each class and
