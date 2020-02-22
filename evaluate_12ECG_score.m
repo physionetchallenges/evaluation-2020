@@ -406,6 +406,8 @@ function [recording_label,classes_label,single_recording_labels]=get_true_labels
 			break
                 end
 	end
+        fclose(fid);
+
 end
 
 
