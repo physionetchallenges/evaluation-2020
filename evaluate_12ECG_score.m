@@ -14,7 +14,8 @@
 % correct diagnoses and false alarms
 %
 % Inputs:
-%   'label_directory' is the input directory with the headers and #dx with the true labels
+%   'label_directory' is a directory of comma-delimited text files containing
+%   vector of the true labels
 %
 %   'output_directory' is a directory of comma-delimited text files, where
 %   the first row of the file is the predictive labels for each class and
@@ -265,6 +266,9 @@ function [auroc, auprc] = compute_auc(labels,probabilities,num_classes)
         error('Numbers of probabilities and labels must be the same.');
     end
 
+    probabilities(isnan(probabilities))=0;
+
+
     auroc_l = zeros(1,num_classes);
     auprc_l = zeros(1,num_classes);
 
@@ -328,6 +332,8 @@ function [auroc, auprc] = compute_auc(labels,probabilities,num_classes)
 	        end
 	    end
 
+		
+
 	    % Summarize contingency table.
 	    tpr = zeros(1, m);
 	    tnr = zeros(1, m);
@@ -370,6 +376,7 @@ function [auroc, auprc] = compute_auc(labels,probabilities,num_classes)
 	        auprc_l(k) = auprc_l(k) + (tpr(j + 1) - tpr(j)) * ppv(j + 1);
 	    end
     end
+
 
     for i =1:num_classes
 	    auroc = auroc + auroc_l(i)*C_l(i);
