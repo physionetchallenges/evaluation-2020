@@ -16,7 +16,8 @@
 # correct diagnoses and false alarms
 #
 # Inputs:
-#   'label_directory' is a input directory with the header files and #Dx true labels
+#   'label_directory' is a directory of comma-delimited text files containing
+#   vector of the true labels
 #
 #   'output_directory' is a directory of comma-delimited text files, where
 #   the first row of the file is the output label for each class and
@@ -282,6 +283,9 @@ def compute_auc(labels, probabilities, num_classes, check_errors=True):
     if check_errors:
         if len(labels) != len(probabilities):
             raise Exception('Numbers of outputs and labels must be the same.')
+
+    find_NaNs = np.isnan(probabilities);
+    probabilities[find_NaNs] = 0;
 
     auroc_l = np.zeros(num_classes)
     auprc_l = np.zeros(num_classes)
