@@ -1,26 +1,19 @@
-dx,code,abbreviation from unofficial phase
-atrial fibrillation,164889003,AF
-1st degree av block,270492004,I-AVB
-left bundle branch block,164909002,LBBB
-sinus rhythm,426783006,Normal
-premature atrial contraction,284470004,PAC
-pvcs premature ventricular complexes,164884008,PVC
-right bundle branch block,59118001,RBBB 
-st depression,429622005,STD
-st elevation,164931005,STE
+dx,code,Abrev
+1st degree av block,270492004,I-aVB
 2nd degree av block,195042002,
 accelerated idioventricular rhythm,61277005,
 accelerated junctional rhythm,426664006,
 acute myocardial ischemia,413444003,
 anterior ischemia,426434006,
 anterior myocardial infarction,54329005,
+atrial fibrillation,164889003,AF
 atrial fibrillation and flutter,195080001,
 atrial flutter,164890007,
 atrial hypertrophy,195126007,
 atrial pacing pattern,251268003,
 atrial tachycardia,713422000,
 av block,233917008,
-blocked pac,251170000,
+blocked premature atrial contraction ,251170000,
 brady tachy syndrome,74615001,
 bradycardia,426627000,
 brugada syndrome,418818005,
@@ -52,6 +45,7 @@ left atrial abnormality,253352002,
 left atrial enlargement,67741000119109,
 left atrial hypertrophy,446813000,
 left axis deviation,39732003,
+left bundle branch block,164909002,LBBB
 left posterior fascicular block,445211001,
 left ventricular hypertrophy,164873001,
 left ventricular strain,370365005,
@@ -67,21 +61,28 @@ non-specific interatrial conduction block,65778007,
 nonspecific intraventricular conduction disorder,698252002,
 nonspecific st t abnormality,428750005,
 old myocardial infarction,164867002,
-paced rhythm,426453001,
+pacing rhythm,10370003,
 paroxysmal supraventricular tachycardia,67198005,
 partial atrioventricular block 2:1,164903001,
+premature atrial contraction,284470004,PAC
+premature ventricular complexes,164884008,PVC
+premature ventricular contractions,427172004,
 prolonged qt interval,111975006,
 qwave abnormal,164917005,
 r wave abnormal,164921003,
 right atrial abnormality,253339007,
 right atrial hypertrophy,446358003,
 right axis deviation,47665007,
+right bundle branch block,59118001,RBBB
 right ventricular hypertrophy,89792004,
 s t changes,55930002,
 shortened pr interval,49578007,
 sinus arrhythmia,427393009,
 sinus bradycardia,426177001,
+sinus rhythm,426783006,Normal – SNR
 sinus tachycardia,427084000,
+st depression,429622005,STD
+st elevation,164931005,STE
 st interval abnormal,164930006,
 supraventricular premature beats,63593006,
 supraventricular tachycardia,426761007,
@@ -99,7 +100,7 @@ ventricular flutter,111288001,
 ventricular hypertrophy,266249003,
 ventricular pacing pattern,251266004,
 ventricular pre excitation,195060002,
+ventricular tachycardia,164895002,
 ventricular trigeminy,251180001,
-vt ventricular tachycardia,164895002,
 wandering atrial pacemaker,195101003,
 wolff parkinson white pattern,74390002,
