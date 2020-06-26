@@ -470,25 +470,30 @@ def compute_auc(labels, outputs):
 
 # Compute modified confusion matrix for multi-class, multi-label tasks.
 def compute_modified_confusion_matrix(labels, outputs):
+    # Compute a binary multi-class, multi-label confusion matrix, where the rows
+    # are the labels and the columns are the outputs.
     num_recordings, num_classes = np.shape(labels)
-
     A = np.zeros((num_classes, num_classes))
+
+    # Iterate over all of the recordings.
     for i in range(num_recordings):
+        sum_outputs = float(np.sum(outputs[i, :]))
+        # Iterate over all of the classes.
         for j in range(num_classes):
-            if labels[i, j]:
-                if outputs[i, j]: # Model correct.
-                    A[j, j] += 1
-                else: # Model incorrect.
-                    sum_outputs = float(np.sum(outputs[i, :]))
-                    for k in range(num_classes):
-                        if outputs[i, k]:
-                            A[j, k] += outputs[i, k]/sum_outputs
+            # Assign full or partial credit for each positive class.
+            if labels[i, j] and outputs[i, j]: # TP
+                A[j, j] += 1.0/sum_outputs
+            elif labels[i, j] and not outputs[i, j]: # FN
+                for k in range(num_classes):
+                    if outputs[i, k]:
+                        A[j, k] += 1.0/sum_outputs
 
     return A
 
 # Compute the evaluation metric for the Challenge.
 def compute_challenge_metric(weights, labels, outputs, classes, normal):
     num_recordings, num_classes = np.shape(labels)
+    normal_index = classes.index(normal)
 
     # Compute observed score.
     A = compute_modified_confusion_matrix(labels, outputs)
@@ -501,7 +506,6 @@ def compute_challenge_metric(weights, labels, outputs, classes, normal):
 
     # Compute score for model that always chooses the normal label.
     inactive_outputs = np.zeros((num_recordings, num_classes), dtype=np.bool)
-    normal_index = classes.index(normal)
     inactive_outputs[:, normal_index] = 1
     A = compute_modified_confusion_matrix(labels, inactive_outputs)
     inactive_score = np.nansum(weights * A)
