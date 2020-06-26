@@ -477,16 +477,16 @@ def compute_modified_confusion_matrix(labels, outputs):
 
     # Iterate over all of the recordings.
     for i in range(num_recordings):
-        sum_outputs = float(np.sum(outputs[i, :]))
+        num_outputs = float(np.sum(outputs[i, :]))
         # Iterate over all of the classes.
         for j in range(num_classes):
             # Assign full or partial credit for each positive class.
             if labels[i, j] and outputs[i, j]: # TP
-                A[j, j] += 1.0/sum_outputs
+                A[j, j] += 1.0/num_outputs
             elif labels[i, j] and not outputs[i, j]: # FN
                 for k in range(num_classes):
                     if outputs[i, k]:
-                        A[j, k] += 1.0/sum_outputs
+                        A[j, k] += 1.0/num_outputs
 
     return A
 
