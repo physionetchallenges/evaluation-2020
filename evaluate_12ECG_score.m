@@ -15,11 +15,17 @@
 % different misclassification errors.
 
 function evaluate_12ECG_score(labels, outputs, output_file)
-    % Check for Python.
+    % Check for Python and NumPy.
     command = 'python -V';
     [status, ~] = system(command);
     if status~=0
         error('Python not found: please install Python or make it available by running "python ...".');
+    end
+    
+    command = 'python -c "import numpy"';
+    [status, ~] = system(command);
+    if status~=0
+        error('NumPy not found: please install NumPy or make it available to Python.');
     end
 
     % Define command for evaluating model outputs.
