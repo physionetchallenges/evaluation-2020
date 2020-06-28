@@ -19,8 +19,7 @@ function evaluate_12ECG_score(labels, outputs, output_file)
     command = 'python -V';
     [status, ~] = system(command);
     if status~=0
-        fprintf('Python not found: please install Python or make it available by running "python ...".');
-        return;
+        error('Python not found: please install Python or make it available by running "python ...".');
     end
 
     % Define command for evaluating model outputs.
