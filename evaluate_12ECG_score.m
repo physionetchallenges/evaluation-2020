@@ -15,14 +15,25 @@
 % different misclassification errors.
 
 function evaluate_12ECG_score(labels, outputs, output_file)
+    % Check for Python.
+    command = 'python -V';
+    [status, ~] = system(command);
+    if status~=0
+        fprintf('Python not found: please install Python or make it available by running "python ...".');
+        return;
+    end
+
+    % Define command for evaluating model outputs.
     switch nargin
         case 2
             command = ['python evaluate_12ECG_score.py' ' ' labels ' ' outputs];
         case 3
             command = ['python evaluate_12ECG_score.py' ' ' labels ' ' outputs ' ' output_file];
+        otherwise
+            command = '';
     end
-    [status, output] = system(command);
-    if status==0
-        fprintf(output)
-    end
+
+    % Evaluate model outputs.
+    [~, output] = system(command);
+    fprintf(output);
 end

@@ -17,3 +17,7 @@ You can run the MATLAB evaluation code by installing Python and the NumPy Python
     evaluate_12ECG_score(labels, outputs, scores.csv)
 
 where `labels` is a directory containing files with one or more labels for each 12-lead ECG recording, such as the training database on the PhysioNet webpage; `outputs` is a directory containing files with outputs produced by your algorithm for those recordings; and `scores.csv` (optional) is a collection of scores for your algorithm.
+
+## Troubleshooting
+
+Unable to run this code with your code? Try one of the [baseline classifiers](https://physionetchallenges.github.io/2020/#submissions) on the [training data](https://physionetchallenges.github.io/2020/#data). Unable to install or run Python? Try  [Python](https://www.python.org/downloads/), [Anaconda](https://www.anaconda.com/products/individual), or your package manager.
