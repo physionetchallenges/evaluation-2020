@@ -19,9 +19,10 @@
 import numpy as np, os, os.path, sys
 
 def evaluate_12ECG_score(label_directory, output_directory):
-    # Define the weights, mapping to SNOMED-CT codes for row/columns of weights, and the SNOMED-CT code for the normal class.
+    # Define the weights, the SNOMED CT code for the normal class, and equivalent SNOMED CT codes.
     weights_file = 'weights.csv'
-    normal = '426783006'
+    normal_class = '426783006'
+    equivalent_classes = [['713427006', '59118001'], ['284470004', '63593006'], ['427172004', '17338001']]
 
     # Find the label and output files.
     print('Finding label and output files...')
@@ -29,8 +30,8 @@ def evaluate_12ECG_score(label_directory, output_directory):
 
     # Load the labels and outputs.
     print('Loading labels and outputs...')
-    label_classes, labels = load_labels(label_files, normal)
-    output_classes, binary_outputs, scalar_outputs = load_outputs(output_files, normal)
+    label_classes, labels = load_labels(label_files, normal_class, equivalent_classes)
+    output_classes, binary_outputs, scalar_outputs = load_outputs(output_files, normal_class, equivalent_classes)
 
     # Organize/sort the labels and outputs.
     print('Organizing labels and outputs...')
@@ -56,7 +57,7 @@ def evaluate_12ECG_score(label_directory, output_directory):
     f_beta_measure, g_beta_measure = compute_beta_measures(labels, binary_outputs, beta=2)
 
     print('- Challenge metric...')
-    challenge_metric = compute_challenge_metric(weights, labels, binary_outputs, classes, normal)
+    challenge_metric = compute_challenge_metric(weights, labels, binary_outputs, classes, normal_class)
 
     print('Done.')
 
@@ -93,7 +94,7 @@ def find_challenge_files(label_directory, output_directory):
         raise IOError('No label or output files found.')
 
 # Load labels from header/label files.
-def load_labels(label_files, normal):
+def load_labels(label_files, normal_class, equivalent_classes_collection):
     # The labels should have the following form:
     #
     # Dx: label_1, label_2, label_3
@@ -106,14 +107,14 @@ def load_labels(label_files, normal):
         with open(label_files[i], 'r') as f:
             for l in f:
                 if l.startswith('#Dx'):
-                    dxs = [arr.strip() for arr in l.split(': ')[1].split(',')]
+                    dxs = set(arr.strip() for arr in l.split(': ')[1].split(','))
                     tmp_labels.append(dxs)
 
     # Identify classes.
     classes = set.union(*map(set, tmp_labels))
-    if normal not in classes:
-        classes.add(normal)
-        print('- The normal class {} is not one of the label classes, so it has been automatically added, but please check that you chose the correct normal class.'.format(normal))
+    if normal_class not in classes:
+        classes.add(normal_class)
+        print('- The normal class {} is not one of the label classes, so it has been automatically added, but please check that you chose the correct normal class.'.format(normal_class))
     classes = sorted(classes)
     num_classes = len(classes)
 
@@ -125,9 +126,30 @@ def load_labels(label_files, normal):
             j = classes.index(dx)
             labels[i, j] = 1
 
+    # For each set of equivalent class, use only one class as the representative class for the set and discard the other classes in the set.
+    # The label for the representative class is positive if any of the labels in the set is positive.
+    remove_classes = list()
+    remove_indices = list()
+    for equivalent_classes in equivalent_classes_collection:
+        equivalent_classes = [x for x in equivalent_classes if x in classes]
+        if len(equivalent_classes)>1:
+            representative_class = equivalent_classes[0]
+            other_classes = equivalent_classes[1:]
+            equivalent_indices = [classes.index(x) for x in equivalent_classes]
+            representative_index = equivalent_indices[0]
+            other_indices = equivalent_indices[1:]
+
+            labels[:, representative_index] = np.any(labels[:, equivalent_indices], axis=1)
+            remove_classes += other_classes
+            remove_indices += other_indices
+
+    for x in remove_classes:
+        classes.remove(x)
+    labels = np.delete(labels, remove_indices, axis=1)
+
     # If the labels for the normal class and one or more other classes are positive, then make the label for the normal class negative.
     # If the labels for all classes are negative, then make the label for the normal class positive.
-    normal_index = classes.index(normal)
+    normal_index = classes.index(normal_class)
     for i in range(num_recordings):
         num_positive_classes = np.sum(labels[i, :])
         if labels[i, normal_index]==1 and num_positive_classes>1:
@@ -138,7 +160,7 @@ def load_labels(label_files, normal):
     return classes, labels
 
 # Load outputs from output files.
-def load_outputs(output_files, normal):
+def load_outputs(output_files, normal_class, equivalent_classes_collection):
     # The outputs should have the following form:
     #
     # diagnosis_1, diagnosis_2, diagnosis_3
@@ -172,9 +194,9 @@ def load_outputs(output_files, normal):
 
     # Identify classes.
     classes = set.union(*map(set, tmp_labels))
-    if normal not in classes:
-        classes.add(normal)
-        print('- The normal class {} is not one of the output classes, so it has been automatically added, but please check that you identified the correct normal class.'.format(normal))
+    if normal_class not in classes:
+        classes.add(normal_class)
+        print('- The normal class {} is not one of the output classes, so it has been automatically added, but please check that you identified the correct normal class.'.format(normal_class))
     classes = sorted(classes)
     num_classes = len(classes)
 
@@ -188,13 +210,37 @@ def load_outputs(output_files, normal):
             binary_outputs[i, j] = tmp_binary_outputs[i][k]
             scalar_outputs[i, j] = tmp_scalar_outputs[i][k]
 
+    # For each set of equivalent class, use only one class as the representative class for the set and discard the other classes in the set.
+    # The binary output for the representative class is positive if any of the classes in the set is positive.
+    # The scalar output is the mean of the scalar outputs for the classes in the set.
+    remove_classes = list()
+    remove_indices = list()
+    for equivalent_classes in equivalent_classes_collection:
+        equivalent_classes = [x for x in equivalent_classes if x in classes]
+        if len(equivalent_classes)>1:
+            representative_class = equivalent_classes[0]
+            other_classes = equivalent_classes[1:]
+            equivalent_indices = [classes.index(x) for x in equivalent_classes]
+            representative_index = equivalent_indices[0]
+            other_indices = equivalent_indices[1:]
+
+            binary_outputs[:, representative_index] = np.any(binary_outputs[:, equivalent_indices], axis=1)
+            scalar_outputs[:, representative_index] = np.nanmean(scalar_outputs[:, equivalent_indices], axis=1)
+            remove_classes += other_classes
+            remove_indices += other_indices
+
+    for x in remove_classes:
+        classes.remove(x)
+    binary_outputs = np.delete(binary_outputs, remove_indices, axis=1)
+    scalar_outputs = np.delete(scalar_outputs, remove_indices, axis=1)
+
     # If any of the outputs is a NaN, then replace it with a zero.
     binary_outputs[np.isnan(binary_outputs)] = 0
     scalar_outputs[np.isnan(scalar_outputs)] = 0
 
     # If the binary outputs for the normal class and one or more other classes are positive, then make the binary output for the normal class negative.
     # If the binary outputs for all classes are negative, then make the binary output for the normal class positive.
-    normal_index = classes.index(normal)
+    normal_index = classes.index(normal_class)
     for i in range(num_recordings):
         num_positive_classes = np.sum(binary_outputs[i, :])
         if binary_outputs[i, normal_index]==1 and num_positive_classes>1:
@@ -480,10 +526,8 @@ def compute_modified_confusion_matrix(labels, outputs):
         num_outputs = float(np.sum(outputs[i, :]))
         # Iterate over all of the classes.
         for j in range(num_classes):
-            # Assign full or partial credit for each positive class.
-            if labels[i, j] and outputs[i, j]: # TP
-                A[j, j] += 1.0/num_outputs
-            elif labels[i, j] and not outputs[i, j]: # FN
+            # Assign full and/or partial credit for each positive class.
+            if labels[i, j]:
                 for k in range(num_classes):
                     if outputs[i, k]:
                         A[j, k] += 1.0/num_outputs
