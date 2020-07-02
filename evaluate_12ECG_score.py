@@ -537,19 +537,27 @@ def compute_modified_confusion_matrix(labels, outputs):
 
 # Compute the evaluation metric for the Challenge.
 def compute_challenge_metric(weights, labels, outputs, classes, normal_class):
-    num_recordings, num_classes = np.shape(labels)
+    # Only consider the classes that are scored in the weight matrix.
+    scored_indices = np.any(weights, axis=0)
+
+    weights = weights[np.ix_(scored_indices, scored_indices)]
+    labels = labels[:, scored_indices]
+    outputs = outputs[:, scored_indices]
+    classes = [x for i, x in enumerate(classes) if scored_indices[i]]
     normal_index = classes.index(normal_class)
 
-    # Compute observed score.
+    num_recordings, num_classes = np.shape(labels)
+
+    # Compute the observed score.
     A = compute_modified_confusion_matrix(labels, outputs)
     observed_score = np.nansum(weights * A)
 
-    # Compute score for model that always chooses the correct label(s).
+    # Compute the score for the model that always chooses the correct label(s).
     correct_outputs = labels
     A = compute_modified_confusion_matrix(labels, correct_outputs)
     correct_score = np.nansum(weights * A)
 
-    # Compute score for model that always chooses the normal class.
+    # Compute the score for the model that always chooses the normal class.
     inactive_outputs = np.zeros((num_recordings, num_classes), dtype=np.bool)
     inactive_outputs[:, normal_index] = 1
     A = compute_modified_confusion_matrix(labels, inactive_outputs)
