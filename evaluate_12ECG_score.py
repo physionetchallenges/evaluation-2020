@@ -41,6 +41,14 @@ def evaluate_12ECG_score(label_directory, output_directory):
     print('Loading weights...')
     weights = load_weights(weights_file, classes)
 
+    # Only consider classes that are scored with the Challenge metric.
+    indices = np.any(weights, axis=0) # Find indices for nonzero rows/columns.
+    classes = [x for i, x in enumerate(classes) if indices[i]]
+    labels = labels[:, indices]
+    scalar_outputs = scalar_outputs[:, indices]
+    binary_outputs = binary_outputs[:, indices]
+    weights = weights[np.ix_(indices, indices)]
+
     # Evaluate the model by comparing the labels and outputs.
     print('Evaluating model...')
 
@@ -537,16 +545,8 @@ def compute_modified_confusion_matrix(labels, outputs):
 
 # Compute the evaluation metric for the Challenge.
 def compute_challenge_metric(weights, labels, outputs, classes, normal_class):
-    # Only consider the classes that are scored in the weight matrix.
-    scored_indices = np.any(weights, axis=0)
-
-    weights = weights[np.ix_(scored_indices, scored_indices)]
-    labels = labels[:, scored_indices]
-    outputs = outputs[:, scored_indices]
-    classes = [x for i, x in enumerate(classes) if scored_indices[i]]
-    normal_index = classes.index(normal_class)
-
     num_recordings, num_classes = np.shape(labels)
+    normal_index = classes.index(normal_class)
 
     # Compute the observed score.
     A = compute_modified_confusion_matrix(labels, outputs)
