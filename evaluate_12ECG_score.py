@@ -42,7 +42,7 @@ def evaluate_12ECG_score(label_directory, output_directory):
     weights = load_weights(weights_file, classes)
 
     # Only consider classes that are scored with the Challenge metric.
-    indices = np.any(weights, axis=0) # Find indices for nonzero rows/columns.
+    indices = np.any(weights, axis=0) # Find indices of classes in weight matrix.
     classes = [x for i, x in enumerate(classes) if indices[i]]
     labels = labels[:, indices]
     scalar_outputs = scalar_outputs[:, indices]
@@ -343,7 +343,6 @@ def load_weights(weight_file, classes):
                 if b in classes:
                     l = classes.index(b)
                     weights[k, l] = values[i, j]
-    np.fill_diagonal(weights, 1)
 
     return weights
 
@@ -386,7 +385,7 @@ def compute_confusion_matrices(labels, outputs, normalize=False):
     else:
         A = np.zeros((num_classes, 2, 2))
         for i in range(num_recordings):
-            normalization = float(np.sum(labels[i, :]))
+            normalization = float(max(np.sum(labels[i, :]), 1))
             for j in range(num_classes):
                 if labels[i, j]==1 and outputs[i, j]==1: # TP
                     A[j, 1, 1] += 1.0/normalization
