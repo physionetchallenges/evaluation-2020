@@ -155,14 +155,11 @@ def load_labels(label_files, normal_class, equivalent_classes_collection):
         classes.remove(x)
     labels = np.delete(labels, remove_indices, axis=1)
 
-    # If the labels for the normal class and one or more other classes are positive, then make the label for the normal class negative.
-    # If the labels for all classes are negative, then make the label for the normal class positive.
+    # If the labels are negative for all classes, then change the label for the normal class to positive.
     normal_index = classes.index(normal_class)
     for i in range(num_recordings):
         num_positive_classes = np.sum(labels[i, :])
-        if labels[i, normal_index]==1 and num_positive_classes>1:
-            labels[i, normal_index] = 0
-        elif num_positive_classes==0:
+        if num_positive_classes==0:
             labels[i, normal_index] = 1
 
     return classes, labels
@@ -246,14 +243,11 @@ def load_outputs(output_files, normal_class, equivalent_classes_collection):
     binary_outputs[np.isnan(binary_outputs)] = 0
     scalar_outputs[np.isnan(scalar_outputs)] = 0
 
-    # If the binary outputs for the normal class and one or more other classes are positive, then make the binary output for the normal class negative.
-    # If the binary outputs for all classes are negative, then make the binary output for the normal class positive.
+    # If the binary outputs are negative for all classes, then change the binary output for the normal class to positive.
     normal_index = classes.index(normal_class)
     for i in range(num_recordings):
         num_positive_classes = np.sum(binary_outputs[i, :])
-        if binary_outputs[i, normal_index]==1 and num_positive_classes>1:
-            binary_outputs[i, normal_index] = 0
-        elif num_positive_classes==0:
+        if num_positive_classes==0:
             binary_outputs[i, normal_index] = 1
 
     return classes, binary_outputs, scalar_outputs
