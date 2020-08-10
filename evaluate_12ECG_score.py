@@ -174,7 +174,8 @@ def load_outputs(output_files, normal_class, equivalent_classes_collection):
     for i in range(num_recordings):
         with open(output_files[i], 'r') as f:
             lines = [l for l in f if l.strip() and not l.strip().startswith('#')]
-            if len(lines)>=3:
+            lengths = [len(l.split(',')) for l in lines]
+            if len(lines)>=3 and len(set(lengths))==1:
                 for j, l in enumerate(lines):
                     arrs = [arr.strip() for arr in l.split(',')]
                     if j==0:
