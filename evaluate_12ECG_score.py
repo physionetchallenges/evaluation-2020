@@ -167,28 +167,36 @@ def load_outputs(output_files, normal_class, equivalent_classes_collection):
     #
     num_recordings = len(output_files)
 
+    # Load the outputs. Perform basic error checking for the output format.
     tmp_labels = list()
     tmp_binary_outputs = list()
     tmp_scalar_outputs = list()
     for i in range(num_recordings):
         with open(output_files[i], 'r') as f:
-            for j, l in enumerate(f):
-                arrs = [arr.strip() for arr in l.split(',')]
-                if j==1:
-                    row = arrs
-                    tmp_labels.append(row)
-                elif j==2:
-                    row = list()
-                    for arr in arrs:
-                        number = 1 if arr in ('1', 'True', 'true', 'T', 't') else 0
-                        row.append(number)
-                    tmp_binary_outputs.append(row)
-                elif j==3:
-                    row = list()
-                    for arr in arrs:
-                        number = float(arr) if is_number(arr) else 0
-                        row.append(number)
-                    tmp_scalar_outputs.append(row)
+            lines = [l for l in f if l.strip() and not l.strip().startswith('#')]
+            if len(lines)>=3:
+                for j, l in enumerate(lines):
+                    arrs = [arr.strip() for arr in l.split(',')]
+                    if j==0:
+                        row = arrs
+                        tmp_labels.append(row)
+                    elif j==1:
+                        row = list()
+                        for arr in arrs:
+                            number = 1 if arr in ('1', 'True', 'true', 'T', 't') else 0
+                            row.append(number)
+                        tmp_binary_outputs.append(row)
+                    elif j==2:
+                        row = list()
+                        for arr in arrs:
+                            number = float(arr) if is_number(arr) else 0
+                            row.append(number)
+                        tmp_scalar_outputs.append(row)
+            else:
+                print('- The output file {} has formatting errors, so all outputs are assumed to be negative for this recording.'.format(output_files[i]))
+                tmp_labels.append(list())
+                tmp_binary_outputs.append(list())
+                tmp_scalar_outputs.append(list())
 
     # Identify classes.
     classes = set.union(*map(set, tmp_labels))
