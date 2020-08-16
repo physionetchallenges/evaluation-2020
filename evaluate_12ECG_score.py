@@ -24,30 +24,15 @@ def evaluate_12ECG_score(label_directory, output_directory):
     normal_class = '426783006'
     equivalent_classes = [['713427006', '59118001'], ['284470004', '63593006'], ['427172004', '17338001']]
 
-    # Find the label and output files.
-    print('Finding label and output files...')
-    label_files, output_files = find_challenge_files(label_directory, output_directory)
-
-    # Load the labels and outputs.
-    print('Loading labels and outputs...')
-    label_classes, labels = load_labels(label_files, normal_class, equivalent_classes)
-    output_classes, binary_outputs, scalar_outputs = load_outputs(output_files, normal_class, equivalent_classes)
-
-    # Organize/sort the labels and outputs.
-    print('Organizing labels and outputs...')
-    classes, labels, binary_outputs, scalar_outputs = organize_labels_outputs(label_classes, output_classes, labels, binary_outputs, scalar_outputs)
-
-    # Load the weights for the Challenge metric.
+    # Load the scored classes and the weights for the Challenge metric.
     print('Loading weights...')
-    weights = load_weights(weights_file, classes)
+    classes, weights = load_weights(weights_file, equivalent_classes)
 
-    # Only consider classes that are scored with the Challenge metric.
-    indices = np.any(weights, axis=0) # Find indices of classes in weight matrix.
-    classes = [x for i, x in enumerate(classes) if indices[i]]
-    labels = labels[:, indices]
-    scalar_outputs = scalar_outputs[:, indices]
-    binary_outputs = binary_outputs[:, indices]
-    weights = weights[np.ix_(indices, indices)]
+    # Load the label and output files.
+    print('Loading label and output files...')
+    label_files, output_files = find_challenge_files(label_directory, output_directory)
+    labels = load_labels(label_files, classes, equivalent_classes)
+    binary_outputs, scalar_outputs = load_outputs(output_files, classes, equivalent_classes)
 
     # Evaluate the model by comparing the labels and outputs.
     print('Evaluating model...')
@@ -101,176 +86,13 @@ def find_challenge_files(label_directory, output_directory):
     else:
         raise IOError('No label or output files found.')
 
-# Load labels from header/label files.
-def load_labels(label_files, normal_class, equivalent_classes_collection):
-    # The labels should have the following form:
-    #
-    # Dx: label_1, label_2, label_3
-    #
-    num_recordings = len(label_files)
-
-    # Load diagnoses.
-    tmp_labels = list()
-    for i in range(num_recordings):
-        with open(label_files[i], 'r') as f:
-            for l in f:
-                if l.startswith('#Dx'):
-                    dxs = set(arr.strip() for arr in l.split(': ')[1].split(','))
-                    tmp_labels.append(dxs)
-
-    # Identify classes.
-    classes = set.union(*map(set, tmp_labels))
-    if normal_class not in classes:
-        classes.add(normal_class)
-        print('- The normal class {} is not one of the label classes, so it has been automatically added, but please check that you chose the correct normal class.'.format(normal_class))
-    classes = sorted(classes)
-    num_classes = len(classes)
-
-    # Use one-hot encoding for labels.
-    labels = np.zeros((num_recordings, num_classes), dtype=np.bool)
-    for i in range(num_recordings):
-        dxs = tmp_labels[i]
-        for dx in dxs:
-            j = classes.index(dx)
-            labels[i, j] = 1
-
-    # For each set of equivalent class, use only one class as the representative class for the set and discard the other classes in the set.
-    # The label for the representative class is positive if any of the labels in the set is positive.
-    remove_classes = list()
-    remove_indices = list()
-    for equivalent_classes in equivalent_classes_collection:
-        equivalent_classes = [x for x in equivalent_classes if x in classes]
-        if len(equivalent_classes)>1:
-            representative_class = equivalent_classes[0]
-            other_classes = equivalent_classes[1:]
-            equivalent_indices = [classes.index(x) for x in equivalent_classes]
-            representative_index = equivalent_indices[0]
-            other_indices = equivalent_indices[1:]
-
-            labels[:, representative_index] = np.any(labels[:, equivalent_indices], axis=1)
-            remove_classes += other_classes
-            remove_indices += other_indices
-
-    for x in remove_classes:
-        classes.remove(x)
-    labels = np.delete(labels, remove_indices, axis=1)
-
-    return classes, labels
-
-# Load outputs from output files.
-def load_outputs(output_files, normal_class, equivalent_classes_collection):
-    # The outputs should have the following form:
-    #
-    # diagnosis_1, diagnosis_2, diagnosis_3
-    #           0,           1,           1
-    #        0.12,        0.34,        0.56
-    #
-    num_recordings = len(output_files)
-
-    # Load the outputs. Perform basic error checking for the output format.
-    tmp_labels = list()
-    tmp_binary_outputs = list()
-    tmp_scalar_outputs = list()
-    for i in range(num_recordings):
-        with open(output_files[i], 'r') as f:
-            lines = [l for l in f if l.strip() and not l.strip().startswith('#')]
-            lengths = [len(l.split(',')) for l in lines]
-            if len(lines)>=3 and len(set(lengths))==1:
-                for j, l in enumerate(lines):
-                    arrs = [arr.strip() for arr in l.split(',')]
-                    if j==0:
-                        row = arrs
-                        tmp_labels.append(row)
-                    elif j==1:
-                        row = list()
-                        for arr in arrs:
-                            number = 1 if arr in ('1', 'True', 'true', 'T', 't') else 0
-                            row.append(number)
-                        tmp_binary_outputs.append(row)
-                    elif j==2:
-                        row = list()
-                        for arr in arrs:
-                            number = float(arr) if is_number(arr) else 0
-                            row.append(number)
-                        tmp_scalar_outputs.append(row)
-            else:
-                print('- The output file {} has formatting errors, so all outputs are assumed to be negative for this recording.'.format(output_files[i]))
-                tmp_labels.append(list())
-                tmp_binary_outputs.append(list())
-                tmp_scalar_outputs.append(list())
-
-    # Identify classes.
-    classes = set.union(*map(set, tmp_labels))
-    if normal_class not in classes:
-        classes.add(normal_class)
-        print('- The normal class {} is not one of the output classes, so it has been automatically added, but please check that you identified the correct normal class.'.format(normal_class))
-    classes = sorted(classes)
-    num_classes = len(classes)
-
-    # Use one-hot encoding for binary outputs and the same order for scalar outputs.
-    binary_outputs = np.zeros((num_recordings, num_classes), dtype=np.bool)
-    scalar_outputs = np.zeros((num_recordings, num_classes), dtype=np.float64)
-    for i in range(num_recordings):
-        dxs = tmp_labels[i]
-        for k, dx in enumerate(dxs):
-            j = classes.index(dx)
-            binary_outputs[i, j] = tmp_binary_outputs[i][k]
-            scalar_outputs[i, j] = tmp_scalar_outputs[i][k]
-
-    # For each set of equivalent class, use only one class as the representative class for the set and discard the other classes in the set.
-    # The binary output for the representative class is positive if any of the classes in the set is positive.
-    # The scalar output is the mean of the scalar outputs for the classes in the set.
-    remove_classes = list()
-    remove_indices = list()
-    for equivalent_classes in equivalent_classes_collection:
-        equivalent_classes = [x for x in equivalent_classes if x in classes]
-        if len(equivalent_classes)>1:
-            representative_class = equivalent_classes[0]
-            other_classes = equivalent_classes[1:]
-            equivalent_indices = [classes.index(x) for x in equivalent_classes]
-            representative_index = equivalent_indices[0]
-            other_indices = equivalent_indices[1:]
-
-            binary_outputs[:, representative_index] = np.any(binary_outputs[:, equivalent_indices], axis=1)
-            scalar_outputs[:, representative_index] = np.nanmean(scalar_outputs[:, equivalent_indices], axis=1)
-            remove_classes += other_classes
-            remove_indices += other_indices
-
-    for x in remove_classes:
-        classes.remove(x)
-    binary_outputs = np.delete(binary_outputs, remove_indices, axis=1)
-    scalar_outputs = np.delete(scalar_outputs, remove_indices, axis=1)
-
-    # If any of the outputs is a NaN, then replace it with a zero.
-    binary_outputs[np.isnan(binary_outputs)] = 0
-    scalar_outputs[np.isnan(scalar_outputs)] = 0
-
-    return classes, binary_outputs, scalar_outputs
-
-# Organize labels and outputs.
-def organize_labels_outputs(label_classes, output_classes, tmp_labels, tmp_binary_outputs, tmp_scalar_outputs):
-    # Include all classes from either the labels or the outputs.
-    classes = sorted(set(label_classes) | set(output_classes))
-    num_classes = len(classes)
-
-    # Check that the labels and outputs have the same numbers of recordings.
-    assert(len(tmp_labels)==len(tmp_binary_outputs)==len(tmp_scalar_outputs))
-    num_recordings = len(tmp_labels)
-
-    # Rearrange the columns of the labels and the outputs to be consistent with the order of the classes.
-    labels = np.zeros((num_recordings, num_classes), dtype=np.bool)
-    for k, dx in enumerate(label_classes):
-        j = classes.index(dx)
-        labels[:, j] = tmp_labels[:, k]
-
-    binary_outputs = np.zeros((num_recordings, num_classes), dtype=np.bool)
-    scalar_outputs = np.zeros((num_recordings, num_classes), dtype=np.float64)
-    for k, dx in enumerate(output_classes):
-        j = classes.index(dx)
-        binary_outputs[:, j] = tmp_binary_outputs[:, k]
-        scalar_outputs[:, j] = tmp_scalar_outputs[:, k]
-
-    return classes, labels, binary_outputs, scalar_outputs
+# For each set of equivalent classes, replace each class with the representative class for the set.
+def replace_equivalent_classes(classes, equivalent_classes):
+    for j, x in enumerate(classes):
+        for multiple_classes in equivalent_classes:
+            if x in multiple_classes:
+                classes[j] = multiple_classes[0] # Use the first class as the representative class.
+    return classes
 
 # Load a table with row and column names.
 def load_table(table_file):
@@ -304,7 +126,7 @@ def load_table(table_file):
     cols = [table[i+1][0] for i in range(num_cols)]
 
     # Find the entries of the table.
-    values = np.zeros((num_rows, num_cols))
+    values = np.zeros((num_rows, num_cols), dtype=np.float64)
     for i in range(num_rows):
         for j in range(num_cols):
             value = table[i+1][j+1]
@@ -316,24 +138,119 @@ def load_table(table_file):
     return rows, cols, values
 
 # Load weights.
-def load_weights(weight_file, classes):
+def load_weights(weight_file, equivalent_classes):
     # Load the weight matrix.
     rows, cols, values = load_table(weight_file)
     assert(rows == cols)
-    num_rows = len(rows)
 
-    # Assign the entries of the weight matrix with rows and columns corresponding to the classes.
+    # For each collection of equivalent classes, replace each class with the representative class for the set.
+    rows = replace_equivalent_classes(rows, equivalent_classes)
+
+    # Check that equivalent classes have identical weights.
+    for j, x in enumerate(rows):
+        for k, y in enumerate(rows[j+1:]):
+            if x==y:
+                assert(np.all(values[j, :]==values[j+1+k, :]))
+                assert(np.all(values[:, j]==values[:, j+1+k]))
+
+    # Use representative classes.
+    classes = [x for j, x in enumerate(rows) if x not in rows[:j]]
+    indices = [rows.index(x) for x in classes]
+    weights = values[np.ix_(indices, indices)]
+
+    return classes, weights
+
+# Load labels from header/label files.
+def load_labels(label_files, classes, equivalent_classes):
+    # The labels should have the following form:
+    #
+    # Dx: label_1, label_2, label_3
+    #
+    num_recordings = len(label_files)
     num_classes = len(classes)
-    weights = np.zeros((num_classes, num_classes), dtype=np.float64)
-    for i, a in enumerate(rows):
-        if a in classes:
-            k = classes.index(a)
-            for j, b in enumerate(rows):
-                if b in classes:
-                    l = classes.index(b)
-                    weights[k, l] = values[i, j]
 
-    return weights
+    # Load diagnoses.
+    tmp_labels = list()
+    for i in range(num_recordings):
+        with open(label_files[i], 'r') as f:
+            for l in f:
+                if l.startswith('#Dx'):
+                    dxs = [arr.strip() for arr in l.split(': ')[1].split(',')]
+                    dxs = replace_equivalent_classes(dxs, equivalent_classes)
+                    tmp_labels.append(dxs)
+
+    # Use one-hot encoding for labels.
+    labels = np.zeros((num_recordings, num_classes), dtype=np.bool)
+    for i in range(num_recordings):
+        dxs = tmp_labels[i]
+        for j, x in enumerate(classes):
+            if x in dxs:
+                labels[i, j] = 1
+
+    return labels
+
+# Load outputs from output files.
+def load_outputs(output_files, classes, equivalent_classes):
+    # The outputs should have the following form:
+    #
+    # diagnosis_1, diagnosis_2, diagnosis_3
+    #           0,           1,           1
+    #        0.12,        0.34,        0.56
+    #
+    num_recordings = len(output_files)
+    num_classes = len(classes)
+
+    # Load the outputs. Perform basic error checking for the output format.
+    tmp_labels = list()
+    tmp_binary_outputs = list()
+    tmp_scalar_outputs = list()
+    for i in range(num_recordings):
+        with open(output_files[i], 'r') as f:
+            lines = [l for l in f if l.strip() and not l.strip().startswith('#')]
+            lengths = [len(l.split(',')) for l in lines]
+            if len(lines)>=3 and len(set(lengths))==1:
+                for j, l in enumerate(lines):
+                    arrs = [arr.strip() for arr in l.split(',')]
+                    if j==0:
+                        row = arrs
+                        row = replace_equivalent_classes(row, equivalent_classes)
+                        tmp_labels.append(row)
+                    elif j==1:
+                        row = list()
+                        for arr in arrs:
+                            number = 1 if arr in ('1', 'True', 'true', 'T', 't') else 0
+                            row.append(number)
+                        tmp_binary_outputs.append(row)
+                    elif j==2:
+                        row = list()
+                        for arr in arrs:
+                            number = float(arr) if is_number(arr) else 0
+                            row.append(number)
+                        tmp_scalar_outputs.append(row)
+            else:
+                print('- The output file {} has formatting errors, so all outputs are assumed to be negative for this recording.'.format(output_files[i]))
+                tmp_labels.append(list())
+                tmp_binary_outputs.append(list())
+                tmp_scalar_outputs.append(list())
+
+    # Use one-hot encoding for binary outputs and the same order for scalar outputs.
+    # If equivalent classes have different binary outputs, then the representative class is positive if any equivalent class is positive.
+    # If equivalent classes have different scalar outputs, then the representative class is the mean of the equivalent classes.
+    binary_outputs = np.zeros((num_recordings, num_classes), dtype=np.bool)
+    scalar_outputs = np.zeros((num_recordings, num_classes), dtype=np.float64)
+    for i in range(num_recordings):
+        dxs = tmp_labels[i]
+        for j, x in enumerate(classes):
+            indices = [k for k, y in enumerate(dxs) if x==y]
+            if indices:
+                binary_outputs[i, j] = np.any([tmp_binary_outputs[i][k] for k in indices])
+                scalar_outputs[i, j] = np.nanmean([tmp_scalar_outputs[i][k] for k in indices])
+
+    # If any of the outputs is a NaN, then replace it with a zero.
+    binary_outputs[np.isnan(binary_outputs)] = 0
+    scalar_outputs[np.isnan(scalar_outputs)] = 0
+
+    return binary_outputs, scalar_outputs
 
 # Compute recording-wise accuracy.
 def compute_accuracy(labels, outputs):
@@ -480,8 +397,6 @@ def compute_auc(labels, outputs):
         tpr = np.zeros(num_thresholds)
         tnr = np.zeros(num_thresholds)
         ppv = np.zeros(num_thresholds)
-        npv = np.zeros(num_thresholds)
-
         for j in range(num_thresholds):
             if tp[j] + fn[j]:
                 tpr[j] = float(tp[j]) / float(tp[j] + fn[j])
@@ -554,7 +469,7 @@ def compute_challenge_metric(weights, labels, outputs, classes, normal_class):
     if correct_score != inactive_score:
         normalized_score = float(observed_score - inactive_score) / float(correct_score - inactive_score)
     else:
-        normalized_score = float('nan')
+        normalized_score = 0.0
 
     return normalized_score
 
