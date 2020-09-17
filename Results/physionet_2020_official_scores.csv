@@ -21,7 +21,7 @@ Final ranking,Team name,CinC Abstract #,Validation Score,Test Database 1 Score,T
 20,DSC,71,0.616,0.824,0.301,0.062,0.194,Y,Y,BSD 2 License,Y,Y,Y - 2nd talk in 1st session,
 21,Pink Irish Hat,198,0.511,0.762,0.127,0.123,0.167,Y,Y,CeCILL-B,Y,Y,Y - poster,
 22,Madhardmax,185,0.533,0.544,0.525,-0.109,0.155,Y,Y,BSD 2 License,Y,Y,Y - poster,
-23,Care4MyHeart,127,0.379,0.611,0.342,-0.027,0.146,Y,Y,Not specified,Y,Y,Y - poster,Must confirm open source license or be disqualified
+23,Care4MyHeart,127,0.379,0.611,0.342,-0.027,0.146,Y,Y,BSD 3 License,Y,Y,Y - poster,
 24,MCIRCC,374,0.616,0.813,0.162,0.050,0.141,Y,Y,PolyForm Strict License 1.0.0,Y,Y,Y - 6th talk in 2nd session,
 25,heartly-ai,356,0.159,0.351,0.128,0.116,0.136,Y,Y,BSD 2 License,Y,Y,Y - poster,
 26,Code Team,130,0.657,0.830,0.181,0.023,0.132,Y,Y,MIT license,Y,Y,Y - 1st talk in 2nd session,
