@@ -38,13 +38,13 @@ def evaluate_12ECG_score(label_directory, output_directory):
     print('Evaluating model...')
 
     print('- AUROC and AUPRC...')
-    auroc, auprc = compute_auc(labels, scalar_outputs)
+    auroc, auprc, auroc_classes, auprc_classes = compute_auc(labels, scalar_outputs)
 
     print('- Accuracy...')
     accuracy = compute_accuracy(labels, binary_outputs)
 
     print('- F-measure...')
-    f_measure = compute_f_measure(labels, binary_outputs)
+    f_measure, f_measure_classes = compute_f_measure(labels, binary_outputs)
 
     print('- F-beta and G-beta measures...')
     f_beta_measure, g_beta_measure = compute_beta_measures(labels, binary_outputs, beta=2)
@@ -55,7 +55,7 @@ def evaluate_12ECG_score(label_directory, output_directory):
     print('Done.')
 
     # Return the results.
-    return auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric
+    return classes, auroc, auprc, auroc_classes, auprc_classes, accuracy, f_measure, f_measure_classes, f_beta_measure, g_beta_measure, challenge_metric
 
 # Check if the input is a number.
 def is_number(x):
@@ -322,7 +322,7 @@ def compute_f_measure(labels, outputs):
 
     macro_f_measure = np.nanmean(f_measure)
 
-    return macro_f_measure
+    return macro_f_measure, f_measure
 
 # Compute F-beta and G-beta measures from the unofficial phase of the Challenge.
 def compute_beta_measures(labels, outputs, beta):
@@ -423,7 +423,7 @@ def compute_auc(labels, outputs):
     macro_auroc = np.nanmean(auroc)
     macro_auprc = np.nanmean(auprc)
 
-    return macro_auroc, macro_auprc
+    return macro_auroc, macro_auprc, auroc, auprc
 
 # Compute modified confusion matrix for multi-class, multi-label tasks.
 def compute_modified_confusion_matrix(labels, outputs):
@@ -474,11 +474,21 @@ def compute_challenge_metric(weights, labels, outputs, classes, normal_class):
     return normalized_score
 
 if __name__ == '__main__':
-    auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric = evaluate_12ECG_score(sys.argv[1], sys.argv[2])
-
+    classes, auroc, auprc, auroc_classes, auprc_classes, accuracy, f_measure, f_measure_classes, f_beta_measure, g_beta_measure, challenge_metric = evaluate_12ECG_score(sys.argv[1], sys.argv[2])
     output_string = 'AUROC,AUPRC,Accuracy,F-measure,Fbeta-measure,Gbeta-measure,Challenge metric\n{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f},{:.3f}'.format(auroc, auprc, accuracy, f_measure, f_beta_measure, g_beta_measure, challenge_metric)
-    if len(sys.argv) > 3:
+    class_output_string = 'Classes,{}\nAUROC,{}\nAUPRC,{}\nF-measure,{}'.format(
+        ','.join(classes),
+        ','.join('{:.3f}'.format(x) for x in auroc_classes),
+        ','.join('{:.3f}'.format(x) for x in auprc_classes),
+        ','.join('{:.3f}'.format(x) for x in f_measure_classes))
+
+    if len(sys.argv) == 3:
+        print(output_string)
+    elif len(sys.argv) == 4:
         with open(sys.argv[3], 'w') as f:
             f.write(output_string)
-    else:
-        print(output_string)
+    elif len(sys.argv) == 5:
+        with open(sys.argv[3], 'w') as f:
+            f.write(output_string)
+        with open(sys.argv[4], 'w') as f:
+            f.write(class_output_string)

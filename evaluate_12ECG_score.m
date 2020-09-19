@@ -14,14 +14,14 @@
 % measure, and the Challenge metric, which assigns different weights to
 % different misclassification errors.
 
-function evaluate_12ECG_score(labels, outputs, output_file)
+function evaluate_12ECG_score(labels, outputs, output_file, class_output_file)
     % Check for Python and NumPy.
     command = 'python -V';
     [status, ~] = system(command);
     if status~=0
         error('Python not found: please install Python or make it available by running "python ...".');
     end
-    
+
     command = 'python -c "import numpy"';
     [status, ~] = system(command);
     if status~=0
@@ -34,6 +34,8 @@ function evaluate_12ECG_score(labels, outputs, output_file)
             command = ['python evaluate_12ECG_score.py' ' ' labels ' ' outputs];
         case 3
             command = ['python evaluate_12ECG_score.py' ' ' labels ' ' outputs ' ' output_file];
+        case 4
+            command = ['python evaluate_12ECG_score.py' ' ' labels ' ' outputs ' ' output_file ' ' class_output_file];
         otherwise
             command = '';
     end
