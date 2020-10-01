@@ -5,6 +5,7 @@ This folder contains several files with the results of the 2020 Challenge.
 We introduced [new scoring metric](https://physionetchallenges.github.io/2020/#scoring) for this Challenge. We used this scoring metric to evaluate and rank the Challenge entries. We included several other metrics for reference. The area under the receiver operating characteristic (AUROC), area under the precision recall curve (AUPRC), and _F_-measure scores are the macro-average of the scores across all classes. The accuracy metric is the fraction of correctly diagnosed recordings, i.e., all classes for the recording are correct. These metrics were computed by the [evaluate_12ECG_score.py](https://github.com/physionetchallenges/evaluation-2020/blob/master/evaluate_12ECG_score.py) script in this repository. Please see this script for more details of these scores.
 
 We included the scores on the following datasets: 
+
 1.- Validation Set: includes recordings from CPSC and G12EC Hidden set.
 2.- Hidden CPSC Set: split between the validation and test set.
 3.- Hidden G12EC Set: Split between the validation and test set.
