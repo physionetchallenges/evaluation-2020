@@ -6,11 +6,11 @@ We introduced [new scoring metric](https://physionetchallenges.github.io/2020/#s
 
 We included the scores on the following datasets: 
 
-1.- Validation Set: includes recordings from CPSC and G12EC Hidden set.
-2.- Hidden CPSC Set: split between the validation and test set.
-3.- Hidden G12EC Set: Split between the validation and test set.
-4.- Hidden Undisclosed Set: All recording were part of the test set.
-5.- Test Set: Includes recording from hidden CPSC, G12EC, and undisclosed.
+1. __Validation Set:__ includes recordings from CPSC and G12EC Hidden set.
+2. __Hidden CPSC Set:__ split between the validation and test set.
+3. __Hidden G12EC Set:__ Split between the validation and test set.
+4. __Hidden Undisclosed Set:__ All recording were part of the test set.
+5. __Test Set:__ Includes recording from hidden CPSC, G12EC, and undisclosed.
 
 To refer to these tables in a publication, please cite [Perez Alday EA, Gu A, Shah A, Robichaux C, Wong A-KI, Liu C, Liu F, Bahrami Rad A, Elola A, Seyedi S, Li Q, Sharma A, Clifford GD, Reyna AR. Classification of 12-lead ECGs: the  PhysioNet/Computing in Cardiology Challenge 2020. Physiol. Meas. (In Press)](https://www.medrxiv.org/content/10.1101/2020.08.11.20172601v1).
 
