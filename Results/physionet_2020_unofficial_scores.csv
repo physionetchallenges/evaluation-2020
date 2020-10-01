@@ -1,4 +1,4 @@
-Team name,CinC Abstract #,Validation Score,Hidden CPSC Set Score,Hidden G12EC Set Score,Hidden Undisclosed Set Score,Test Set Score,Training code produces output?,Model uses output from training code?,Open-source license?,Registered at CinC?,Preprint at CinC?,Presented at CinC?
+Team name,CinC Abstract #,Validation Set Score,Hidden CPSC Set Score,Hidden G12EC Set Score,Hidden Undisclosed Set Score,Test Set Score,Training code produces output?,Model uses output from training code?,Open-source license?,Registered at CinC?,Preprint at CinC?,Presented at CinC?
 AAIST,No abstract,0.507,0.674,0.485,0.275,0.377,Y,Y,BSD 2 License,N,N,N
 AImsterdam,327,0.609,0.636,0.252,-0.093,0.198,N,N,Unknown,Y,N,N
 BERCLAB UND,79,0.197,0.564,0.127,0.106,0.141,Y,Y,Unknown,Y,N,N
