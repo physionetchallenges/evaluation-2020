@@ -1,4 +1,4 @@
-Final ranking,Team name,CinC Abstract #,Validation Score,Hidden CPSC Set Score,Hidden G12EC Set Score,Hidden Undisclosed Set Score,Test Set Score,Training code produces output?,Model uses output from training code?,Open-source license?,Registered at CinC?,Preprint at CinC?,Presented at CinC?,Note
+Final ranking,Team name,CinC Abstract #,Validation Set Score,Hidden CPSC Set Score,Hidden G12EC Set Score,Hidden Undisclosed Set Score,Test Set Score,Training code produces output?,Model uses output from training code?,Open-source license?,Registered at CinC?,Preprint at CinC?,Presented at CinC?,Note
 1,prna,107,0.587,0.761,0.558,0.492,0.533,Y,Y,BSD 2 License,Y,Y,Y - poster,
 2,Between_a_ROC_and_a_heart_place,112,0.672,0.845,0.639,0.412,0.520,Y,Y,BSD 2 License,Y,Y,Y - poster,
 3,HeartBeats,281,0.682,0.852,0.649,0.396,0.514,Y,Y,BSD 2 License,Y,Y,Y - poster,
