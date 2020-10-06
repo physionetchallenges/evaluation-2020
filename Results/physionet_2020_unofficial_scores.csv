@@ -2,7 +2,6 @@ Team name,CinC Abstract #,Validation Set Score,Hidden CPSC Set Score,Hidden G12E
 AAIST,No abstract,0.507,0.674,0.485,0.275,0.377,Y,Y,BSD 2 License,N,N,N
 AImsterdam,327,0.609,0.636,0.252,-0.093,0.198,N,N,Unknown,Y,N,N
 BERCLAB UND,79,0.197,0.564,0.127,0.106,0.141,Y,Y,Unknown,Y,N,N
-BioS,124,0.349,0.556,0.312,0.228,0.279,Y,Y,BSD 2 License,Y,N,Y - poster
 BME_Feng,69,0.001,0.003,0.001,-0.030,-0.016,Y,Y,BSD 2 License,N,N,N
 BraveHeart400,83,0.449,0.657,0.413,-0.265,0.034,Y,Y,BSD 2 License,N,N,N
 BRIC,331,0.539,0.652,0.189,0.030,0.127,Y,Y,BSD 2 License,N,N,N
@@ -18,6 +17,7 @@ Medics,187,0.189,0.480,0.146,NaN,NaN,Y,Y,BSD 2 License,N,N,N
 MetaHeart,196,0.616,0.758,0.590,0.194,0.370,Y,Y,BSD 2 License,Y,Y,Y - poster (but no response to questions)
 Metformin-121,136,0.623,0.865,0.586,0.413,0.505,Y,Y,BSD 2 License,N,N,N
 ML Warriors,412,0.389,0.395,0.390,0.181,0.269,N,N,BSD 2 License,N,N,N
+NACAS_12X,180,0.645,0.846,0.202,0.000,0.127,Y,Y,BSD 2 License,Y,Y (but did not update preprint)s,Y - poster,
 nebula,39,0.526,0.736,0.086,0.052,0.109,N,N,BSD 2 License,Y,Y,Y - poster
 NN-MIH,63,0.585,0.665,0.567,0.367,0.456,N,N,BSD 2 License,Y,Y,Y - poster
 NTU-Accesslab,72,0.544,0.725,0.510,NaN,NaN,Y,Y,BSD 2 License,Y,Y,Y - poster
