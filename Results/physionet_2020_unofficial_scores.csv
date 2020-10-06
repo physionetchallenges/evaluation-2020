@@ -2,7 +2,7 @@ Team name,CinC Abstract #,Validation Set Score,Hidden CPSC Set Score,Hidden G12E
 AAIST,No abstract,0.507,0.674,0.485,0.275,0.377,Y,Y,BSD 2 License,N,N,N
 AImsterdam,327,0.609,0.636,0.252,-0.093,0.198,N,N,Unknown,Y,N,N
 BERCLAB UND,79,0.197,0.564,0.127,0.106,0.141,Y,Y,Unknown,Y,N,N
-BioS,123,0.349,0.556,0.312,0.228,0.279,Y,Y,BSD 2 License,Y,N,Y - poster
+BioS,124,0.349,0.556,0.312,0.228,0.279,Y,Y,BSD 2 License,Y,N,Y - poster
 BME_Feng,69,0.001,0.003,0.001,-0.030,-0.016,Y,Y,BSD 2 License,N,N,N
 BraveHeart400,83,0.449,0.657,0.413,-0.265,0.034,Y,Y,BSD 2 License,N,N,N
 BRIC,331,0.539,0.652,0.189,0.030,0.127,Y,Y,BSD 2 License,N,N,N
