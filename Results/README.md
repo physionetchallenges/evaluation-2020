@@ -12,7 +12,7 @@ We included the scores on the following datasets:
 4. __Hidden Undisclosed Set:__ All recordings were part of the test sets.
 5. __Test Set:__ Includes recordings from the hidden CPSC, G12EC, and undisclosed test sets.
 
-To refer to these tables in a publication, please cite [Perez Alday EA, Gu A, Shah A, Robichaux C, Wong A-KI, Liu C, Liu F, Bahrami Rad A, Elola A, Seyedi S, Li Q, Sharma A, Clifford GD, Reyna AR. Classification of 12-lead ECGs: the  PhysioNet/Computing in Cardiology Challenge 2020. Physiol. Meas. (In Press)](https://www.medrxiv.org/content/10.1101/2020.08.11.20172601v1).
+To refer to these tables in a publication, please cite [Perez Alday EA, Gu A, Shah AJ, Robichaux C, Wong AI, Liu C, Liu F, Rad AB, Elola A, Seyedi S, Li Q, Sharma A, Clifford GD<sup>*</sup>, Reyna MA<sup>*</sup>. Classification of 12-lead ECGs: the PhysioNet/Computing in Cardiology Challenge 2020. Physiol Meas. 41 (2020). doi: 10.1088/1361-6579/abc960](https://iopscience.iop.org/article/10.1088/1361-6579/abc960).
 
 1. Official entries that were scored on the validation and test data and ranked in the Challenge:
 [physionet_2020_official_scores.csv](https://github.com/physionetchallenges/evaluation-2020/blob/master/Results/physionet_2020_official_scores.csv)
